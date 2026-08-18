@@ -1,0 +1,31 @@
+version: "3.9"
+
+# Local PostgreSQL for the KJS-SRS-01 mission control simulator.
+#   docker compose -f backend/docker-compose.yml up -d
+#
+# Published on host port 5544 rather than the default 5432. A locally installed
+# PostgreSQL commonly occupies 5432, and a second instance frequently lands on
+# 5433, so both of those collide in practice; 5544 stays clear of them. If it is
+# taken on your machine, change the host side here and DATABASE_URL to match.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: somaiyasat-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: somaiya
+      POSTGRES_PASSWORD: somaiya
+      POSTGRES_DB: somaiyasat
+    ports:
+      - "5544:5432"
+    volumes:
+      - somaiyasat_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U somaiya -d somaiyasat"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  somaiyasat_pgdata:

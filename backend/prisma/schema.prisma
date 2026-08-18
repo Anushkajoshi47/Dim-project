@@ -1,0 +1,74 @@
+// KJS-SRS-01 mission control — persistence schema.
+//
+// The simulation is the source of truth for *live* values; PostgreSQL holds the
+// rolling history so charts survive a page refresh and the jury can scrub back
+// through previous orbits.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// One sampled frame of a telemetry channel ("power" | "thermal" | "attitude"
+/// | "obc" | "orbit" | "radio"). `data` holds the channel payload verbatim so
+/// new fields can be added to an engine without a migration.
+model TelemetrySample {
+  id         Int      @id @default(autoincrement())
+  channel    String
+  simTime    DateTime
+  recordedAt DateTime @default(now())
+  data       Json
+
+  @@index([channel, simTime])
+  @@index([simTime])
+}
+
+/// Output of the AI inter-satellite routing scorer, one row per decision.
+model RoutingDecision {
+  id            Int      @id @default(autoincrement())
+  simTime       DateTime
+  recordedAt    DateTime @default(now())
+  route         String
+  confidence    Float
+  estLatencyMs  Float
+  estPacketLoss Float
+  queueDepth    Int
+  reasoning     String
+  candidates    Json
+
+  @@index([simTime])
+}
+
+/// Mock uplink command history, including the simulated ack round trip.
+model CommandLog {
+  id          Int       @id @default(autoincrement())
+  commandId   String    @unique
+  type        String
+  params      Json
+  status      String
+  issuedAt    DateTime
+  simTime     DateTime
+  ackAt       DateTime?
+  uplinkDelay Int
+  result      String?
+
+  @@index([issuedAt])
+}
+
+/// Telemetry alerts, routing notices and command acknowledgements.
+model EventLog {
+  id       Int      @id @default(autoincrement())
+  eventId  String   @unique
+  simTime  DateTime
+  severity String
+  source   String
+  message  String
+  data     Json?
+
+  @@index([simTime])
+  @@index([source, simTime])
+}

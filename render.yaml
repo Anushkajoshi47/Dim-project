@@ -1,0 +1,63 @@
+# Render Blueprint — deploys the whole stack from this repository.
+#
+# Render is used here because this backend cannot run on a serverless platform:
+# it holds a persistent socket.io server and runs the simulation on setInterval
+# loops inside one long-lived process. Vercel/Netlify functions are request-
+# scoped and would kill both. The frontend alone *can* go on Vercel — see the
+# alternative in README § Deployment.
+#
+# Usage: Render dashboard → New → Blueprint → pick this repo.
+# After the first deploy, set the two `sync: false` variables to the real URLs
+# (they are not known until the services exist) and redeploy both services.
+
+databases:
+  - name: somaiyasat-db
+    databaseName: somaiyasat
+    user: somaiya
+    plan: free
+
+services:
+  # ---------------------------------------------------------------- backend
+  - type: web
+    name: somaiyasat-backend
+    runtime: node
+    plan: free
+    region: singapore
+    branch: main
+    # migrate deploy (not migrate dev) — it applies the committed migration
+    # without prompting and without needing a shadow database.
+    buildCommand: npm install && npm -w backend run build && npm -w backend run prisma:deploy
+    startCommand: npm -w backend run start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: somaiyasat-db
+          property: connectionString
+      # Set to the deployed frontend origin, e.g.
+      #   https://somaiyasat-frontend.onrender.com
+      # Comma-separate to allow more than one.
+      - key: CORS_ORIGIN
+        sync: false
+      - key: SIM_SPEED
+        value: "30"
+
+  # --------------------------------------------------------------- frontend
+  - type: web
+    name: somaiyasat-frontend
+    runtime: node
+    plan: free
+    region: singapore
+    branch: main
+    buildCommand: npm install && npm -w frontend run build
+    startCommand: npm -w frontend run start
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      # Baked into the client bundle at BUILD time, so changing it requires a
+      # rebuild, not just a restart. Set to the backend URL, e.g.
+      #   https://somaiyasat-backend.onrender.com
+      - key: NEXT_PUBLIC_BACKEND_URL
+        sync: false

@@ -1,0 +1,134 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * KJS-SRS-01 mission console.
+ *
+ * Deliberately dark-only: this is an operations console, not a document, and
+ * the palette is the one validated for the charts (see lib/theme.ts).
+ */
+:root {
+  color-scheme: dark;
+
+  --void: #080c11;
+  --panel: #0d141b;
+  --surface: #111820;
+  --raised: #16202b;
+
+  --line: #1e2833;
+  --line-strong: #2b3947;
+
+  --ink: #e8eef5;
+  --ink-dim: #a9b6c4;
+  --ink-muted: #7d8b9c;
+
+  /* Chrome accent — never used as a data-series colour. */
+  --accent: #34d3c0;
+
+  /* Reserved status colours; always shipped with a text label. */
+  --nominal: #0ca30c;
+  --warn: #fab219;
+  --serious: #ec835a;
+  --critical: #d03b3b;
+
+  /* Categorical series slots, in fixed order. */
+  --s1: #3987e5;
+  --s2: #d95926;
+  --s3: #199e70;
+  --s4: #c98500;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background-color: var(--void);
+  color: var(--ink);
+  font-feature-settings: 'tnum' 1, 'cv05' 1;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+/* Numeric readouts align vertically — mission-console convention. */
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Thin, unobtrusive scrollbars inside panels. */
+.scroll-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+.scroll-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.scroll-thin::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+  border-radius: 3px;
+}
+.scroll-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Faint scanline texture — reads as CRT/console without harming legibility. */
+.scanlines::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.014) 0px,
+    rgba(255, 255, 255, 0.014) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+/* ---------------------------------------------------------------- Leaflet */
+
+.leaflet-container {
+  background: #070b10 !important;
+  font-family: inherit;
+  outline: none;
+}
+
+/* Tone the raster tiles down so the data overlay stays dominant. */
+.leaflet-tile-pane {
+  filter: brightness(0.62) saturate(0.5) contrast(1.05);
+}
+
+.leaflet-control-attribution {
+  background: rgba(8, 12, 17, 0.82) !important;
+  color: var(--ink-muted) !important;
+  font-size: 9px !important;
+  border-radius: 2px;
+}
+.leaflet-control-attribution a {
+  color: var(--ink-dim) !important;
+}
+
+.leaflet-control-zoom a {
+  background: rgba(17, 24, 32, 0.94) !important;
+  color: var(--ink-dim) !important;
+  border-color: var(--line) !important;
+}
+.leaflet-control-zoom a:hover {
+  background: var(--raised) !important;
+  color: var(--ink) !important;
+}
+
+/* --------------------------------------------------------------- Recharts */
+
+.recharts-cartesian-axis-tick-value {
+  font-size: 10px;
+  fill: var(--ink-muted);
+}
+
+.recharts-surface {
+  overflow: visible;
+}
