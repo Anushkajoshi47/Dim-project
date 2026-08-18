@@ -24,9 +24,14 @@ services:
     plan: free
     region: singapore
     branch: main
+    # --include=dev is REQUIRED. Render sets NODE_ENV=production, and npm then
+    # omits devDependencies by default — which here means typescript, the prisma
+    # CLI and tsx, i.e. everything the build needs. Without it the build fails
+    # with "tsc: not found".
+    #
     # migrate deploy (not migrate dev) — it applies the committed migration
     # without prompting and without needing a shadow database.
-    buildCommand: npm install && npm -w backend run build && npm -w backend run prisma:deploy
+    buildCommand: npm install --include=dev && npm -w backend run build && npm -w backend run prisma:deploy
     startCommand: npm -w backend run start
     healthCheckPath: /api/health
     envVars:
@@ -51,7 +56,9 @@ services:
     plan: free
     region: singapore
     branch: main
-    buildCommand: npm install && npm -w frontend run build
+    # --include=dev as above: tailwindcss, postcss, autoprefixer and typescript
+    # are devDependencies that `next build` cannot run without.
+    buildCommand: npm install --include=dev && npm -w frontend run build
     startCommand: npm -w frontend run start
     envVars:
       - key: NODE_VERSION
