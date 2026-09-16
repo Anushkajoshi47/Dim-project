@@ -26,3 +26,15 @@ pgdata/
 
 # typescript incremental build info
 *.tsbuildinfo
+
+# testing — coverage & mutation testing artefacts
+backend/coverage/
+backend/.stryker-tmp/
+backend/stryker.log
+backend/mutation/.backup/
+backend/mutation/.tmp/
+
+# Mutation reports: keep the latest summary (it is the lab deliverable),
+# drop the timestamped history and the large generated Stryker artefacts.
+backend/mutation/reports/*
+!backend/mutation/reports/latest.md

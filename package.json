@@ -15,7 +15,11 @@
     "db:down": "docker compose -f backend/docker-compose.yml down",
     "db:migrate": "npm -w backend run prisma:migrate",
     "db:studio": "npm -w backend run prisma:studio",
-    "setup": "npm install && npm run db:up && npm run db:migrate"
+    "setup": "npm install && npm run db:up && npm run db:migrate",
+    "test": "npm -w backend run test",
+    "test:coverage": "npm -w backend run test:coverage",
+    "mutation": "npm -w backend run mutation",
+    "mutation:auto": "npm -w backend run mutation:auto"
   },
   "devDependencies": {
     "concurrently": "^9.1.0"
